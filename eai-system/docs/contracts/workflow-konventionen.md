@@ -1,48 +1,21 @@
 # Contract: Workflow-Konventionen
 
-**Version:** 1.0
-**Stand:** 2026-02-27
-**Status:** Accepted
+**Version:** 1.0 | **Status:** Accepted
 
----
+Gilt für alle Argo-Workflow-Definitionen in `workflows/`.
 
-## Geltungsbereich
+## Datenübergabe
 
-Gilt für **alle Argo-Workflow-Definitionen** in `workflows/`.
+1. Artifact Passing MUSS der Default-Mechanismus sein.
+2. Shared Volumes NUR bei >100MB, Pfadkonvention dokumentieren.
+3. Parameters NUR für Metadaten (IDs, Counts, Flags).
+4. Parameters NICHT für große Daten.
 
----
+## Retry
 
-## Definitionen
-
-- **Workflow:** Eine Argo-Workflow-Definition die einen vollständigen Datenfluss beschreibt.
-- **Step:** Ein einzelner Container-Lauf innerhalb eines Workflows.
-- **Artifact:** Eine Datei die zwischen Steps übergeben wird.
-- **Parameter:** Metadaten oder Steuerungsinformation die zwischen Steps übergeben werden.
-
----
-
-## Datenübergabe zwischen Steps
-
-### Anforderungen
-
-1. Artifact Passing MUSS als Default-Mechanismus für Datenübergabe zwischen Steps verwendet werden.
-2. Shared Volumes DÜRFEN nur bei großen Payloads (>100MB) verwendet werden.
-3. Bei Shared Volumes MUSS die Pfadkonvention dokumentiert werden.
-4. Parameters MÜSSEN für Metadaten und Steuerungsinformation verwendet werden (IDs, Counts, Flags).
-5. Parameters DÜRFEN NICHT für die Übergabe großer Datenmengen verwendet werden.
-
----
-
-## Retry-Konfiguration
-
-### Anforderungen
-
-6. Jeder Step MUSS eine Retry-Konfiguration haben.
-7. Die Standard-Retry-Policy MUSS sein: 3 Versuche, exponentielles Backoff ab 30 Sekunden.
-8. Die maximale Retry-Dauer MUSS 5 Minuten sein.
-9. Die Standard-Retry-Policy SOLL über das Template `workflows/templates/retry-defaults.yaml` referenziert werden.
-
-### Standard-Konfiguration
+5. Jeder Step MUSS eine Retry-Konfiguration haben.
+6. Standard: 3 Versuche, exponentiell ab 30s.
+7. Max. Retry-Dauer: 5 Minuten.
 
 ```yaml
 retryStrategy:
@@ -54,101 +27,24 @@ retryStrategy:
     maxDuration: "5m"
 ```
 
----
-
 ## Error-Handling
 
-### Anforderungen
+8. Jeder Workflow MUSS einen Exit-Handler haben (`spec.onExit`).
+9. Exit-Handler MUSS Fehler strukturiert loggen.
 
-10. Jeder Workflow MUSS einen Exit-Handler definieren (`spec.onExit`).
-11. Der Exit-Handler MUSS bei Fehler den Workflow-Status und den Fehler strukturiert loggen.
-12. Der Exit-Handler SOLL das Template `workflows/templates/error-handler.yaml` referenzieren.
+## Labels
 
----
-
-## Annotation-Labels
-
-### Anforderungen
-
-13. Jeder Workflow MUSS folgende Labels haben:
-
-| Label | Beschreibung | Beispielwerte |
-|---|---|---|
-| `team` | Verantwortliches Team | `eai-core`, `integration-team` |
-| `category` | Workflow-Kategorie | `import`, `export`, `diff`, `sync` |
-
----
+10. Jeder Workflow MUSS Labels haben:
+    - `team`: verantwortliches Team
+    - `category`: `import`/`export`/`diff`/`sync`
 
 ## Container-Referenzierung
 
-### Anforderungen
-
-14. Container-Images MÜSSEN mit semantischem Tag referenziert werden (z.B. `v1.2.3`).
-15. Container-Images DÜRFEN NICHT mit `latest` referenziert werden.
-16. Container-Images MÜSSEN aus der internen Registry referenziert werden (`registry.intern/`).
-
----
+11. Images MÜSSEN mit semantischem Tag referenziert werden.
+12. `latest` ist VERBOTEN.
+13. Images MÜSSEN aus `registry.intern/` kommen.
 
 ## Umgebungsvariablen
 
-### Anforderungen
-
-17. Jeder Step MUSS die Standard-Umgebungsvariablen aus `container-konvention.md` setzen.
-18. `CORRELATION_ID` MUSS auf die Workflow-UID gesetzt werden: `"{{workflow.uid}}"`.
-19. Die Standard-Umgebungsvariablen SOLLEN über das Template `workflows/templates/common-env.yaml` gesetzt werden.
-
----
-
-## Beispiele
-
-### Korrekt: Vollständiger Workflow
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  name: import-planpro
-  labels:
-    team: eai-core
-    category: import
-spec:
-  entrypoint: main
-  onExit: error-handler
-  templates:
-    - name: main
-      steps:
-        - - name: fetch
-            template: file-fetcher
-        - - name: transform
-            template: planpro-ingest
-            arguments:
-              artifacts:
-                - name: input
-                  from: "{{steps.fetch.outputs.artifacts.output}}"
-    - name: file-fetcher
-      container:
-        image: registry.intern/base-file-fetcher:v1.0.0
-        env:
-          - name: CORRELATION_ID
-            value: "{{workflow.uid}}"
-      retryStrategy:
-        limit: 3
-        backoff:
-          duration: "30s"
-          factor: 2
-```
-
-### Inkorrekt: latest Tag
-
-```yaml
-container:
-  image: registry.intern/base-file-fetcher:latest  # VERBOTEN
-```
-
-### Inkorrekt: Fehlende Labels
-
-```yaml
-metadata:
-  name: import-planpro
-  # FEHLT: labels mit team und category
-```
+14. Jeder Step MUSS Standard-Env-Vars aus `container-konvention.md` setzen.
+15. `CORRELATION_ID` MUSS `"{{workflow.uid}}"` sein.

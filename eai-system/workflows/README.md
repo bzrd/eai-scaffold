@@ -1,82 +1,29 @@
-# workflows/ – Argo Workflow Definitionen
+# workflows/ – Argo Workflow-Definitionen
 
-## Zweck
-
-Dieser Ordner enthält alle Argo-Workflow-Definitionen. Workflows orchestrieren die Datenflüsse zwischen Base-Containern und Transformern. Sie werden als YAML oder über Hera (Python SDK) definiert.
-
----
+Orchestriert Datenflüsse zwischen Base-Containern und Transformern.
 
 ## Struktur
 
 ```
 workflows/
-├── templates/         # Wiederverwendbare Workflow-Templates
-│   ├── retry-defaults.yaml
-│   ├── common-env.yaml
-│   └── error-handler.yaml
-├── examples/          # Vollständig kommentierte Beispiel-Workflows
-│   ├── import-planpro.yaml
-│   ├── export-planpro.yaml
-│   └── diff-report.yaml
-├── README.md
+├── templates/   # retry-defaults.yaml, common-env.yaml, error-handler.yaml
+├── examples/    # import-planpro.yaml, export-planpro.yaml, diff-report.yaml
 └── AGENTS.md
 ```
 
----
-
 ## Konventionen
 
-- **Workflow-Namen:** `<kategorie>-<beschreibung>` (z.B. `import-planpro`, `export-system-a`)
-- **Container-Tags:** Immer semantische Version, **niemals `latest`**
-- **Artifact Passing** als Default-Mechanismus für Datenübergabe zwischen Steps
-- **Parameters** für Metadaten und Steuerungsinformation (IDs, Counts, Flags)
-- **Retry-Defaults:** 3 Versuche, exponentielles Backoff ab 30s
-- **Exit-Handler** für jeden Workflow
-- **Annotation-Labels:** Verantwortliches Team + Kategorie (import/export/diff/sync)
+- Container-Tags: immer semantische Version, **niemals `latest`**
+- Datenübergabe: Artifact Passing (Default), Shared Volumes nur bei >100MB
+- Retry: 3 Versuche, exponentiell ab 30s, max 5min
+- Exit-Handler: Pflicht für jeden Workflow
+- Labels: `team` + `category` (import/export/diff/sync)
 - Git-Tag: `workflow-<name>/v<major>.<minor>.<patch>`
 
----
+## Checkliste
 
-## Abhängigkeiten
-
-- Container-Images aus `transformers/` und `base-containers/`
-- Templates aus `workflows/templates/`
-- Konventionen aus `docs/contracts/workflow-konventionen.md`
-
----
-
-## Beispiel: Workflow-Struktur
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  name: import-planpro
-  labels:
-    team: eai-core
-    category: import
-spec:
-  entrypoint: main
-  onExit: error-handler
-  templates:
-    - name: main
-      steps:
-        - - name: fetch
-            template: file-fetcher
-        - - name: transform
-            template: planpro-ingest
-        - - name: store
-            template: ds-writer
-```
-
----
-
-## Checkliste für neue Workflows
-
-- [ ] Alle Container-Referenzen mit semantischem Tag (kein `latest`)
-- [ ] Artifact Passing für Daten zwischen Steps
+- [ ] Kein `latest`-Tag
+- [ ] Artifact Passing für Daten
 - [ ] Retry-Defaults angewandt
 - [ ] Exit-Handler definiert
-- [ ] Annotation-Labels gesetzt (Team, Kategorie)
-- [ ] Vollständig kommentiert
-- [ ] Konform mit `docs/contracts/workflow-konventionen.md`
+- [ ] Labels gesetzt
