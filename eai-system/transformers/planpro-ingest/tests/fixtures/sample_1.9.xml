@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fixture: Minimales PlanPro 1.9 Beispiel für Unit-Tests -->
+<!-- Ersetzen durch echte oder echt-nahe PlanPro-Strukturen -->
+<PlanPro_Schnittstelle xmlns="http://www.plan-pro.org/modell/PlanPro/1.9.0">
+  <LST_Zustand_Start>
+    <Container>
+      <!-- Hier PlanPro-Objekte einfügen -->
+    </Container>
+  </LST_Zustand_Start>
+</PlanPro_Schnittstelle>

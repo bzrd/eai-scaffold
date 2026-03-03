@@ -50,7 +50,12 @@ def transform(input_data: InputData) -> TransformResult: ...
 - `@pytest.mark.unit`, Testort: `<transformer>/tests/`
 - Happy Path, Edge Cases (leer, minimal), Error Case, GUID-Integrität
 
+## Hinweis: XML-Parsing
+
+XML-Parsing lebt ausschließlich in `transformers/planpro-ingest/convert.py`. Alle anderen Transformer arbeiten mit plain dicts (JSON). Es gibt keine `planpro_parser`-Library mehr – nicht importieren.
+
 ## Abhängigkeiten
 
-- DARFST: `common`, `planpro_parser`, Python-stdlib
-- NICHT: `ds_client`, andere Transformer, Base-Container
+- DARFST: `common`, Python-stdlib
+- DARFST (nur planpro-ingest): `xml.etree.ElementTree` oder `lxml`
+- NICHT: `planpro_parser`, `ds_client`, andere Transformer, Base-Container

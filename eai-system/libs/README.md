@@ -6,19 +6,17 @@ Repo-interne Python-Libraries. Direkt per Import eingebunden (HEAD-Prinzip, kein
 
 ```
 libs/
-├── planpro-parser/  # PlanPro XML → typisierte Dataclasses
-├── ds-client/       # REST-Client für den Datenspeicher (FIN)
-└── common/          # Logging, Provenance, Config, Validierung (Basis)
+├── ds-client/  # REST-Client für den Datenspeicher (FIN)
+└── common/     # Logging, Provenance, Config, Validierung (Basis)
 ```
+
+`planpro-parser` existiert nicht mehr. XML-Parsing lebt in `transformers/planpro-ingest/convert.py`.
 
 ## Abhängigkeitshierarchie
 
 ```
-common  ←  planpro-parser
 common  ←  ds-client
 ```
-
-`planpro-parser` und `ds-client` dürfen sich **nicht** gegenseitig importieren.
 
 ## Konventionen
 

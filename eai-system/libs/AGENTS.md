@@ -6,12 +6,13 @@ Du erweiterst oder pflegst eine repo-interne Shared Library.
 
 ## Regeln
 
-- Du MUSST die Abhängigkeitshierarchie einhalten: `common` hat keine internen Abhängigkeiten; `planpro-parser` und `ds-client` importieren nur `common`.
+- Du MUSST die Abhängigkeitshierarchie einhalten: `common` hat keine internen Abhängigkeiten; `ds-client` importiert nur `common`.
 - Du MUSST vollständige Type Hints verwenden. `mypy --strict` grün.
 - Du MUSST Tests für jede neue Funktion schreiben.
-- Du darfst NIEMALS Netzwerk-Calls oder Datenbankzugriffe in `common` oder `planpro-parser` einbauen.
+- Du darfst NIEMALS Netzwerk-Calls oder Datenbankzugriffe in `common` einbauen.
 - Du MUSST `common.logging` verwenden, kein `print()`.
 - Du MUSST bei Breaking Changes einen ADR schreiben und alle Stellen im Repo updaten.
+- `planpro-parser` existiert nicht mehr – niemals neu anlegen ohne expliziten ADR.
 
 ## Pattern: Library-Struktur
 
@@ -35,5 +36,4 @@ libs/<name>/
 | Library | Darf importieren | Nicht erlaubt |
 |---|---|---|
 | `common` | Python-stdlib | alle internen |
-| `planpro-parser` | `common`, `lxml`/`xml.etree` | `ds_client` |
-| `ds-client` | `common`, `requests`/`httpx` | `planpro_parser` |
+| `ds-client` | `common`, `requests`/`httpx` | alle anderen internen |

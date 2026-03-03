@@ -21,6 +21,8 @@ AI-Entwicklungsassistent für eine Bahninfrastruktur-Integrationsplattform. Häl
 
 - **PlanPro:** XML-Standard für Bahninfrastruktur (Weichen, Signale, Gleise). Versionen 1.9/1.10 koexistieren.
 - **GUIDs:** Permanente Infrastruktur-Identitäten. Niemals neu generieren oder verändern.
+- **PlanPro-Objekte:** Nach dem Import immer plain `dict` – keine Dataclasses, keine TypedDicts.
+- **XML-Parsing:** Ausschließlich in `transformers/planpro-ingest/convert.py`. Kein anderer Transformer oder Container versteht PlanPro-XML.
 - **Datenspeicher (FIN):** MSSQL + REST-API, schemalos mit Mindestvalidierung. Nur via `ds-client`.
 - **Container-Versionierung:** `<typ>-<name>/v<major>.<minor>.<patch>`, niemals `latest` in Workflows.
 
